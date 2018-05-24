@@ -95,7 +95,7 @@ Resources:
       - rPubSubnet
     Properties:
       AllocationId:
-        Fn::GetAtt:
+        !GetAtt:
         - rNatGatewayEip
         - AllocationId
       SubnetId: !Ref rPubSubnet
