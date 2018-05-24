@@ -1,0 +1,156 @@
+---
+AWSTemplateFormatVersion: 2010-09-09
+Resources:
+  rVPC:
+    Type: AWS::EC2::VPC
+    Properties:
+      CidrBlock: 172.31.0.0/16
+      EnableDnsSupport: true
+      EnableDnsHostnames: true
+      InstanceTenancy: default
+      
+  rInternetGateway:
+    Type: AWS::EC2::InternetGateway      
+  
+  rVPCGatewayAttachment:
+    Type: AWS::EC2::VPCGatewayAttachment
+    DependsOn: 
+      - rInternetGateway
+    Properties:
+      VpcId: !Ref rVPC
+      InternetGatewayId: !Ref rInternetGateway
+      
+  rPubSubnet:
+    Type: AWS::EC2::Subnet
+    DependsOn: 
+      - rVPC
+    Properties:
+      AvailabilityZone: us-east-2a
+      VpcId: !Ref rVPC
+      CidrBlock: 172.31.0.0/24
+      MapPublicIpOnLaunch: true      
+
+  rRouteTable:
+    Type: AWS::EC2::RouteTable
+    DependsOn: 
+      - rVPC
+    Properties:
+      VpcId: !Ref rVPC      
+    
+  
+  rInternetRoute:
+    Type: AWS::EC2::Route
+    DependsOn: 
+      - rRouteTable
+    Properties:
+      DestinationCidrBlock: 0.0.0.0/0
+      GatewayId: !Ref rInternetGateway
+      RouteTableId: !Ref rRouteTable    
+      
+  rPubSubnetRouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    DependsOn: 
+      - rInternetRoute
+      - rPubSubnet
+    Properties:
+      RouteTableId: !Ref rRouteTable
+      SubnetId: !Ref rPubSubnet
+      
+  rPubSubnetSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    DependsOn: 
+      - rVPC
+    Properties:
+      GroupName: "Internet Group"
+      GroupDescription: "HTTP, HTTPS and SSH traffic in, all traffic out."
+      VpcId: !Ref rVPC
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: '22'
+          ToPort: '22'
+          CidrIp: 0.0.0.0/0
+        - IpProtocol: tcp
+          FromPort: '80'
+          ToPort: '80'
+          CidrIp: 0.0.0.0/0
+        - IpProtocol: tcp
+          FromPort: '443'
+          ToPort: '443'
+          CidrIp: 0.0.0.0/0
+      SecurityGroupEgress:
+        - IpProtocol: -1
+          CidrIp: 0.0.0.0/0      
+
+  rNatGatewayEip:
+    DependsOn:
+      - rVPCGatewayAttachment
+    Type: AWS::EC2::EIP
+    Properties:
+      Domain: vpc
+
+  rNatGateway:
+    Type: AWS::EC2::NatGateway
+    DependsOn: 
+      - rNatGatewayEip
+      - rPubSubnet
+    Properties:
+      AllocationId:
+        Fn::GetAtt:
+        - rNatGatewayEip
+        - AllocationId
+      SubnetId: !Ref rPubSubnet
+
+  rPvtSubnet:
+    Type: AWS::EC2::Subnet
+    DependsOn: 
+      - rVPC
+      - rNatGateway
+    Properties:
+      AvailabilityZone: us-east-2a
+      VpcId: !Ref rVPC
+      CidrBlock: 172.31.1.0/24
+      MapPublicIpOnLaunch: false      
+
+  rPvtRouteTable:
+    Type: AWS::EC2::RouteTable
+    DependsOn: 
+      - rVPC
+    Properties:
+      VpcId: !Ref rVPC      
+    
+  rPvtRoute:
+    Type: AWS::EC2::Route
+    DependsOn: 
+      - rPvtRouteTable
+      - rNatGateway
+    Properties:
+      DestinationCidrBlock: 0.0.0.0/0
+      NatGatewayId: !Ref rNatGateway
+      RouteTableId: !Ref rPvtRouteTable    
+      
+  rPvtSubnetRouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    DependsOn: 
+      - rPvtRouteTable
+      - rPvtSubnet
+    Properties:
+      RouteTableId: !Ref rPvtRouteTable
+      SubnetId: !Ref rPvtSubnet
+
+  rPvtSubnetSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    DependsOn: 
+      - rVPC
+    Properties:
+      GroupName: "Private subnet Group"
+      GroupDescription: "SSH traffic in from DMZ, all traffic out."
+      VpcId: !Ref rVPC
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: '22'
+          ToPort: '22'
+          CidrIp: 172.31.0.0/24
+      SecurityGroupEgress:
+        - IpProtocol: -1
+          CidrIp: 0.0.0.0/0      
+
