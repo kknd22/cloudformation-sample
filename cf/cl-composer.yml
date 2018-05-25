@@ -19,19 +19,17 @@ Parameters:
       - t2.small
 
 Resources:
-  sTwoTierVPCStack:
+  sTwoTierVPC:
     Type: AWS::CloudFormation::Stack
     Properties:
       TemplateURL: https://s3.amazonaws.com/cl-stack/two-tier-network-stack.yml
-      TimeoutInMinutes: '5'
-  
-  sWebEC2Stack:
+
+  sWebEC2:
     Type: AWS::CloudFormation::Stack
     Properties:
+      TemplateURL: https://s3.amazonaws.com/cl-stack/web-ec2-stack.yml
       Parameters:
         pKeyName: !Ref pKeyName
         pInstanceType: !Ref pInstanceType
-        pSubnet: !GetAtt sTwoTierVPCStack.Outputs.oPubSubnet
-        pSecurityGroup: !GetAtt sTwoTierVPCStack.Outputs.oPubSubnetSecurityGroup
-      TemplateURL: https://s3.amazonaws.com/cl-stack/web-ec2-stack.yml
-      TimeoutInMinutes: '2'
+        pSubnet: !GetAtt sTwoTierVPC.Outputs.oPubSubnet
+        pSecurityGroup: !GetAtt sTwoTierVPC.Outputs.oPubSubnetSecurityGroup
