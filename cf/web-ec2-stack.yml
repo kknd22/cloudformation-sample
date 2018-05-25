@@ -1,0 +1,67 @@
+---
+AWSTemplateFormatVersion: 2010-09-09
+Description: Web EC2 instance attached with subnet and security group
+
+Parameters:
+  
+  pKeyName:
+    Description: Name of an existing EC2 KeyPair to enable SSH access to the gettance
+    Type: AWS::EC2::KeyPair::KeyName
+    Default: cl-key-1
+    ConstraintDescription: must be the name of an existing EC2 KeyPair.
+
+  pInstanceType: 
+    Description: EC2 InstanceType.
+    Type: String
+    Default: t2.micro
+    AllowedValues: 
+      - t2.micro
+      - t2.small
+
+  pSubnet:
+    Description: the subnet the webEc2 is in
+    Type:  AWS::EC2::Subnet
+    AllowedPattern: ".+"
+
+  pSecurityGroup:
+    Description: the security grouip of the subnet
+    Type:  AWS::EC2::SecurityGroup
+    AllowedPattern: ".+"
+
+Resources:
+  rEC2Web:
+    Type: AWS::EC2::Instance
+    DependsOn: 
+      - rVPC
+      - rPubSubnetSecurityGroup
+      - rPubSubnet
+      - rPubSubnetRouteTableAssociation
+    Properties:
+      InstanceType: !Ref pInstanceType
+      KeyName: !Ref pKeyName
+      ImageId: ami-14c5486b
+      NetworkInterfaces: 
+        - AssociatePublicIpAddress: "true"
+          DeviceIndex: "0"
+          GroupSet: 
+            - !Ref rPubSubnetSecurityGroup
+          SubnetId: !Ref rPubSubnet
+      UserData:
+        Fn::Base64:                               
+          !Sub |
+            #!/bin/bash -ex
+            yum install -y httpd;
+            echo "<html>YAML CloudFormation is neat!</html>" > /var/www/html/index.html;
+            cd /var/www/html;
+            chmod 755 index.html;
+            service httpd start;
+            chkconfig httpd on;
+Outputs:
+  oWebURL:
+    Description: Newly created web home URL      
+    Value: !Join 
+      - ''
+      - - 'http://'
+        - !GetAtt 
+          - rEC2Web
+          - PublicIp
