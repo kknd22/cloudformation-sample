@@ -1,5 +1,13 @@
 ---
 AWSTemplateFormatVersion: 2010-09-09
+Description: cl - VPC with 2 subnets
+
+Parameters:
+  pKeyName:
+    Description: Name of an existing EC2 KeyPair to enable SSH access to the gettance
+    Type: AWS::EC2::KeyPair::KeyName
+    ConstraintDescription: must be the name of an existing EC2 KeyPair.
+
 Resources:
   rVPC:
     Type: AWS::EC2::VPC
@@ -25,7 +33,7 @@ Resources:
     DependsOn: 
       - rVPC
     Properties:
-      AvailabilityZone: us-east-2a
+      AvailabilityZone: us-east-1a
       VpcId: !Ref rVPC
       CidrBlock: 172.31.0.0/24
       MapPublicIpOnLaunch: true      
@@ -95,9 +103,7 @@ Resources:
       - rPubSubnet
     Properties:
       AllocationId:
-        !GetAtt:
-        - rNatGatewayEip
-        - AllocationId
+        !GetAtt rNatGatewayEip.AllocationId
       SubnetId: !Ref rPubSubnet
 
   rPvtSubnet:
@@ -106,7 +112,7 @@ Resources:
       - rVPC
       - rNatGateway
     Properties:
-      AvailabilityZone: us-east-2a
+      AvailabilityZone: us-east-1a
       VpcId: !Ref rVPC
       CidrBlock: 172.31.1.0/24
       MapPublicIpOnLaunch: false      
@@ -153,4 +159,23 @@ Resources:
       SecurityGroupEgress:
         - IpProtocol: -1
           CidrIp: 0.0.0.0/0      
+  
+  rEC2Web:
+    Type: AWS::EC2::Instance
+    DependsOn: 
+      - rVPC
+      - rPubSubnetSecurityGroup
+      - rPubSubnet
+      - rPubSubnetRouteTableAssociation
+    Properties:
+      InstanceType: t2.micro
+      KeyName: !Ref pKeyName
+      ImageId: ami-14c5486b
+      NetworkInterfaces: 
+        - AssociatePublicIpAddress: "true"
+          DeviceIndex: "0"
+          GroupSet: 
+            - !Ref rPubSubnetSecurityGroup
+          SubnetId: !Ref rPubSubnet
+    
 
