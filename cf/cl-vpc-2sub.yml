@@ -3,10 +3,20 @@ AWSTemplateFormatVersion: 2010-09-09
 Description: cl - VPC with 2 subnets
 
 Parameters:
+  
   pKeyName:
     Description: Name of an existing EC2 KeyPair to enable SSH access to the gettance
     Type: AWS::EC2::KeyPair::KeyName
+    Default: cl-key-1
     ConstraintDescription: must be the name of an existing EC2 KeyPair.
+
+  pInstanceType: 
+    Description: EC2 InstanceType.
+    Type: String
+    Default: t2.micro
+    AllowedValues: 
+      - t2.micro
+      - t2.small
 
 Resources:
   rVPC:
@@ -168,7 +178,7 @@ Resources:
       - rPubSubnet
       - rPubSubnetRouteTableAssociation
     Properties:
-      InstanceType: t2.micro
+      InstanceType: !Ref pInstanceType
       KeyName: !Ref pKeyName
       ImageId: ami-14c5486b
       NetworkInterfaces: 
@@ -177,5 +187,18 @@ Resources:
           GroupSet: 
             - !Ref rPubSubnetSecurityGroup
           SubnetId: !Ref rPubSubnet
-    
 
+Outputs:
+  oPubSubnet:
+    Description: front layer subnet
+    Value: !Ref rPubSubnet  
+  oPubSubnetSecurityGroup:
+    Description: front layer subnet security group
+    Value: !Ref rPubSubnetSecurityGroup
+  oPvtSubnet:
+    Description: back layer subnet
+    Value: !Ref rPvtSubnet  
+  oPvtSubnetSecurityGroup:
+    Description: back layer subnet security group
+    Value: !Ref rPvtSubnetSecurityGroup
+    
