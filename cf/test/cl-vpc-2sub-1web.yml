@@ -1,0 +1,221 @@
+---
+AWSTemplateFormatVersion: 2010-09-09
+Description: cl - VPC with 2 subnets
+
+Parameters:
+  
+  pKeyName:
+    Description: Name of an existing EC2 KeyPair to enable SSH access to the gettance
+    Type: AWS::EC2::KeyPair::KeyName
+    Default: cl-key-1
+    ConstraintDescription: must be the name of an existing EC2 KeyPair.
+
+  pInstanceType: 
+    Description: EC2 InstanceType.
+    Type: String
+    Default: t2.micro
+    AllowedValues: 
+      - t2.micro
+      - t2.small
+
+Resources:
+  rVPC:
+    Type: AWS::EC2::VPC
+    Properties:
+      CidrBlock: 172.31.0.0/16
+      EnableDnsSupport: true
+      EnableDnsHostnames: true
+      InstanceTenancy: default
+      
+  rInternetGateway:
+    Type: AWS::EC2::InternetGateway      
+  
+  rVPCGatewayAttachment:
+    Type: AWS::EC2::VPCGatewayAttachment
+    DependsOn: 
+      - rInternetGateway
+    Properties:
+      VpcId: !Ref rVPC
+      InternetGatewayId: !Ref rInternetGateway
+      
+  rPubSubnet:
+    Type: AWS::EC2::Subnet
+    DependsOn: 
+      - rVPC
+    Properties:
+      AvailabilityZone: us-east-1a
+      VpcId: !Ref rVPC
+      CidrBlock: 172.31.0.0/24
+      MapPublicIpOnLaunch: true      
+
+  rRouteTable:
+    Type: AWS::EC2::RouteTable
+    DependsOn: 
+      - rVPC
+    Properties:
+      VpcId: !Ref rVPC      
+    
+  
+  rInternetRoute:
+    Type: AWS::EC2::Route
+    DependsOn: 
+      - rRouteTable
+    Properties:
+      DestinationCidrBlock: 0.0.0.0/0
+      GatewayId: !Ref rInternetGateway
+      RouteTableId: !Ref rRouteTable    
+      
+  rPubSubnetRouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    DependsOn: 
+      - rInternetRoute
+      - rPubSubnet
+    Properties:
+      RouteTableId: !Ref rRouteTable
+      SubnetId: !Ref rPubSubnet
+      
+  rPubSubnetSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    DependsOn: 
+      - rVPC
+    Properties:
+      GroupName: "Internet Group"
+      GroupDescription: "HTTP, HTTPS and SSH traffic in, all traffic out."
+      VpcId: !Ref rVPC
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: '22'
+          ToPort: '22'
+          CidrIp: 0.0.0.0/0
+        - IpProtocol: tcp
+          FromPort: '80'
+          ToPort: '80'
+          CidrIp: 0.0.0.0/0
+        - IpProtocol: tcp
+          FromPort: '443'
+          ToPort: '443'
+          CidrIp: 0.0.0.0/0
+      SecurityGroupEgress:
+        - IpProtocol: -1
+          CidrIp: 0.0.0.0/0      
+
+  rNatGatewayEip:
+    DependsOn:
+      - rVPCGatewayAttachment
+    Type: AWS::EC2::EIP
+    Properties:
+      Domain: vpc
+
+  rNatGateway:
+    Type: AWS::EC2::NatGateway
+    DependsOn: 
+      - rNatGatewayEip
+      - rPubSubnet
+    Properties:
+      AllocationId:
+        !GetAtt rNatGatewayEip.AllocationId
+      SubnetId: !Ref rPubSubnet
+
+  rPvtSubnet:
+    Type: AWS::EC2::Subnet
+    DependsOn: 
+      - rVPC
+      - rNatGateway
+    Properties:
+      AvailabilityZone: us-east-1a
+      VpcId: !Ref rVPC
+      CidrBlock: 172.31.1.0/24
+      MapPublicIpOnLaunch: false      
+
+  rPvtRouteTable:
+    Type: AWS::EC2::RouteTable
+    DependsOn: 
+      - rVPC
+    Properties:
+      VpcId: !Ref rVPC      
+    
+  rPvtRoute:
+    Type: AWS::EC2::Route
+    DependsOn: 
+      - rPvtRouteTable
+      - rNatGateway
+    Properties:
+      DestinationCidrBlock: 0.0.0.0/0
+      NatGatewayId: !Ref rNatGateway
+      RouteTableId: !Ref rPvtRouteTable    
+      
+  rPvtSubnetRouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    DependsOn: 
+      - rPvtRouteTable
+      - rPvtSubnet
+    Properties:
+      RouteTableId: !Ref rPvtRouteTable
+      SubnetId: !Ref rPvtSubnet
+
+  rPvtSubnetSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    DependsOn: 
+      - rVPC
+    Properties:
+      GroupName: "Private subnet Group"
+      GroupDescription: "SSH traffic in from DMZ, all traffic out."
+      VpcId: !Ref rVPC
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: '22'
+          ToPort: '22'
+          CidrIp: 172.31.0.0/24
+      SecurityGroupEgress:
+        - IpProtocol: -1
+          CidrIp: 0.0.0.0/0      
+  
+  rEC2Web:
+    Type: AWS::EC2::Instance
+    DependsOn: 
+      - rVPC
+      - rPubSubnetSecurityGroup
+      - rPubSubnet
+      - rPubSubnetRouteTableAssociation
+    Properties:
+      InstanceType: !Ref pInstanceType
+      KeyName: !Ref pKeyName
+      ImageId: ami-14c5486b
+      NetworkInterfaces: 
+        - AssociatePublicIpAddress: "true"
+          DeviceIndex: "0"
+          GroupSet: 
+            - !Ref rPubSubnetSecurityGroup
+          SubnetId: !Ref rPubSubnet
+      UserData:
+        Fn::Base64:                               
+          !Sub |
+            #!/bin/bash -ex
+            yum install -y httpd;
+            echo "<html>YAML CloudFormation is neat!</html>" > /var/www/html/index.html;
+            cd /var/www/html;
+            chmod 755 index.html;
+            service httpd start;
+            chkconfig httpd on;
+Outputs:
+  oPubSubnet:
+    Description: front layer subnet
+    Value: !Ref rPubSubnet  
+  oPubSubnetSecurityGroup:
+    Description: front layer subnet security group
+    Value: !Ref rPubSubnetSecurityGroup
+  oPvtSubnet:
+    Description: back layer subnet
+    Value: !Ref rPvtSubnet  
+  oPvtSubnetSecurityGroup:
+    Description: back layer subnet security group
+    Value: !Ref rPvtSubnetSecurityGroup
+  oWebURL:
+    Description: Newly created web home URL      
+    Value: !Join 
+      - ''
+      - - 'http://'
+        - !GetAtt 
+          - rEC2Web
+          - PublicIp
+          
