@@ -157,7 +157,7 @@ Resources:
 Outputs:
   oPubSubnet:
     Description: front layer subnet
-    Value: !Ref rPubSubnet  
+    Value: !Ref rPubSubnet 
   oPubSubnetSecurityGroup:
     Description: front layer subnet security group
     Value: !Ref rPubSubnetSecurityGroup
