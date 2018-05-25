@@ -7,26 +7,21 @@ Parameters:
   pKeyName:
     Description: Name of an existing EC2 KeyPair to enable SSH access to the gettance
     Type: AWS::EC2::KeyPair::KeyName
-    Default: cl-key-1
-    ConstraintDescription: must be the name of an existing EC2 KeyPair.
+    AllowedPattern: ".+"
 
   pInstanceType: 
     Description: EC2 InstanceType.
     Type: String
-    Default: t2.micro
-    AllowedValues: 
-      - t2.micro
-      - t2.small
+    AllowedPattern: ".+"
 
   pSubnet:
     Description: the subnet the webEc2 is in
-    Type:  AWS::EC2::Subnet
-    AllowedPattern: ".+"
+    Type: AWS::EC2::Subnet::Id
 
   pSecurityGroup:
     Description: the security grouip of the subnet
-    Type:  AWS::EC2::SecurityGroup
-    AllowedPattern: ".+"
+    Type: AWS::EC2::SecurityGroup::Id 
+
 
 Resources:
   rEC2Web:
@@ -39,8 +34,8 @@ Resources:
         - AssociatePublicIpAddress: "true"
           DeviceIndex: "0"
           GroupSet: 
-            - !Ref pPubSubnetSecurityGroup
-          SubnetId: !Ref pPubSubnet
+            - !Ref pSecurityGroup
+          SubnetId: !Ref pSubnet
       UserData:
         Fn::Base64:                               
           !Sub |
