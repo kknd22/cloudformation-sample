@@ -167,4 +167,3 @@ Outputs:
   oPvtSubnetSecurityGroup:
     Description: back layer subnet security group
     Value: !Ref rPvtSubnetSecurityGroup
-    
