@@ -1,0 +1,12 @@
+---
+
+- name: install apache web server
+  yum: 
+    name: httpd-2.4.33
+    state: present
+    
+- name: Enable service httpd, and set to the running state
+  service:
+    name: httpd
+    enabled: yes
+    state: started
