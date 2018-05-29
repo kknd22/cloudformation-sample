@@ -1,4 +1,9 @@
+---
+  # these varaibles are shared among diff hosts and roles
 
 web_doc_root_dir: '/var/www/html'
+
+wordpress_user: 'wordpress'
+wordpress_group: 'wordpress'
 
 
