@@ -1,2 +1,4 @@
 
 mariadb_verion: '5.5.56'
+
+wordpress_db_name: 'wordpress'
