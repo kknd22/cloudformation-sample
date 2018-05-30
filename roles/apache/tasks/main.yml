@@ -2,7 +2,7 @@
 
 - name: install apache web server
   yum: 
-    name: httpd-2.4.33
+    name: "httpd-{{ apache_version }}"
     state: present
     
 - name: Enable service httpd, and set to the running state
