@@ -1,10 +1,2 @@
 ---
 
-- name: Add group for wordpress
-  group: 
-    name: "{{ wordpress_group }}"
-  
-- name: Add user "wordpress"
-  user: 
-    name: "{{ wordpress_user }}" 
-    group: ""{{ wordpress_group }}"   
