@@ -1,0 +1,6 @@
+---
+- hosts: dbs
+  connection: local
+
+  roles: 
+    - mariadb

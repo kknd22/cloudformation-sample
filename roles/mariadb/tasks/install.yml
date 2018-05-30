@@ -2,14 +2,18 @@
 
 - name: install mariadbs
   yum: 
-    name: {{ item }}
-    state: latest
+    name: "{{ item }}-{{ mariadb_verion }}"
+    state: present
   with_items:
     - mariadb-server
     - mariadb
+  become: yes
+  become_user: root
 
-- name: Start mariadb Service
-  service: 
-    name=mariadb 
-    state=started 
-    enabled=yes
+- name: install MySQL-python
+  yum: 
+    name: MySQL-python-1.2.5
+    state: present
+  become: yes
+  become_user: root
+
