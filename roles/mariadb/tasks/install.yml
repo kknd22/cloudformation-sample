@@ -1,2 +1,9 @@
 ---
 
+- name: install mariadbs
+  yum: 
+    name: {{ item }}
+    state: latest
+  with_items:
+    - mariadb-server
+    - mariadb
