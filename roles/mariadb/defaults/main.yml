@@ -1,0 +1,2 @@
+# this value should be overriden from playbook command line after web server got assigned the dynamic ip
+web_server_ip: '127.0.0.1'
