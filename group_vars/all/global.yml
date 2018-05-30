@@ -1,9 +1,10 @@
 ---
   # these varaibles are shared among diff hosts and roles
 
-apache_user: 'apache'
-
 web_doc_root_dir: '/var/www/html'
+
+apache_user: 'apache'
+apache_group: 'apache'
 
 wordpress_user: 'wordpress'
 wordpress_group: 'wordpress'
