@@ -1,9 +1,14 @@
 ---
 
 # TBD: ansible mysql module has issue to set the root password, this is the temp workaroud
+#- name: set MariaDB root password 
+#  shell: mysql -u root -e "UPDATE mysql.user SET Password=PASSWORD('{{ root_db_pass }}') WHERE User='root';"
+#  ignore_errors: yes
+
 - name: set MariaDB root password 
-  shell: mysql -u root -e "UPDATE mysql.user SET Password=PASSWORD('{{ root_db_pass }}') WHERE User='root';"
+  shell: mysqladmin -u root password {{ root_db_pass }}
   ignore_errors: yes
+
 
 - name: Create WordPress database
   mysql_db: 
