@@ -1,2 +1,12 @@
 ---
 
+- name: Change ownership of WordPress installation
+  file:
+    path: "{{ web_doc_root_dir }}"
+    owner: apache
+    group: apache
+    state: directory
+    recurse: yes
+    setype: httpd_sys_content_t
+  become: yes
+  become_user: root
