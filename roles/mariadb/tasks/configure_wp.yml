@@ -1,39 +1,9 @@
 ---
-- name: start MariaDB
-  service:
-    name: mariadb
-    state: restarted
-    enabled: yes
-  become: yes
-  become_user: root
 
-- name: check for existing MariaDB configuration
-  stat:
-    path: /etc/my.cnf.d/wp.cnf
-  register: my_cnf
-
-- name: set MariaDB root password
-  mysql_user:
-    name: root
-    password: "{{ root_db_pass }}"
-    login_user: root
-    login_password: "{{ root_db_pass }}"
-  when: my_cnf.stat.exists == False
-  become: yes
-  become_user: root
-
-- name: create MariaDB configuration
-  template:
-    src: wp.cnf.j2
-    dest: /etc/my.cnf.d/wp.cnf
-    mode: 0644
-  become: yes
-  become_user: root
-
-#- name: set MariaDB root password
-#  mysql_user:
-#    name: root
-#    password: "{{ root_db_pass }}"
+# TBD: ansible mysql module has issue to set the root password, this is the temp workaroud
+- name: set MariaDB root password 
+  shell: mysql -u root -e "UPDATE mysql.user SET Password=PASSWORD('{{ root_db_pass }}') WHERE User='root';"
+  ignore_errors: yes
 
 - name: Create WordPress database
   mysql_db: 
@@ -61,17 +31,6 @@
     state: present
     login_user: root
     login_password: "{{ root_db_pass }}"
-
-- name: Change ownership of WordPress installation
-  file: 
-    path: "{{ web_doc_root_dir }}"
-    owner: apache 
-    group: apache
-    state: directory 
-    recurse: yes 
-    setype: httpd_sys_content_t
-  become: yes
-  become_user: root
 
 - name: restart mariadb Service
   service: 
