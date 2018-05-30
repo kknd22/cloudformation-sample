@@ -11,7 +11,7 @@
     group: "{{ apache_group }}"
     mode: 0775
   
-- name: Change ownership of WordPress installation
+- name: change ownership of WordPress installation
   file:
     path: "{{ web_doc_root_dir }}"
     owner: apache
