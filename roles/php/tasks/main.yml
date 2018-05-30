@@ -2,12 +2,14 @@
 
 - name: install php and its modules
   yum: 
-    name: {{ item }}
+    name: "{{ item }}"
     state: latest
   with_items:
     - php
     - php-mysql
     - php-gd
+  become: yes
+  become_user: root
 
 - name: start httpd
   service:

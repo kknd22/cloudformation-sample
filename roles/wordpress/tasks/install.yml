@@ -1,14 +1,25 @@
 
 ---
 
+- name: mkdir directory for download
+  file:
+    path: "{{ wordpress_install_src_dir }}"
+    state: directory
+  become: yes
+  become_user: root
+
 - name: download WordPress
   get_url:
     url: "https://wordpress.org/wordpress-{{ wordpress_version }}.tar.gz"
     dest: "{{ wordpress_install_src_dir }}/wordpress-{{ wordpress_version }}.tar.gz"
+  become: yes
+  become_user: root
 
 - name: unpack WordPress
   unarchive:
     src: "{{ wordpress_install_src_dir }}/wordpress-{{ wordpress_version }}.tar.gz"
     dest: "{{ wordpress_install_src_dir }}"
     remote_src: yes
+  become: yes
+  become_user: root
 

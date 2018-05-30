@@ -2,6 +2,8 @@
 
 - name: copy WordPress to {{ web_doc_root_dir }}
   shell: "rsync -avP {{ wordpress_install_src_dir }}/wordpress/ {{ web_doc_root_dir }}/"
+  become: yes
+  become_user: root
   
 - name: mkdir directory for uploads
   file:
@@ -10,6 +12,8 @@
     owner: "{{ apache_user }}"
     group: "{{ apache_group }}"
     mode: 0775
+  become: yes
+  become_user: root
   
 - name: change ownership of WordPress installation
   file:
@@ -21,3 +25,11 @@
     setype: httpd_sys_content_t
   become: yes
   become_user: root
+
+ - name: copy wp-config.php.j2 to the right place
+   template:	
+     src: wp-config.php.j2 
+     dest: "{{ web_doc_root_dir }}/wp-config.php"
+     mode: 0644
+  become: yes
+  become_user: apache

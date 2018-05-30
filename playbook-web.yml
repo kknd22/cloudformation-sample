@@ -1,6 +1,8 @@
 ---
-- hosts: dbs
+- hosts: webs
   connection: local
 
   roles: 
-    - mariadb
+    - apache
+    - php
+    - wordpress
