@@ -1,1 +1,23 @@
 ---
+
+- name: Create WordPress database
+  mysql_db: 
+    name: "{{ wp_db_name }}"
+    state: present    
+    
+- name: Create WordPress database user
+  mysql_user: 
+    name: "{{ wp_db_user }}" 
+    password={{ wp_db_password }} 
+    priv: {{ wp_db_name }}.*:ALL 
+    host_all:yes 
+    state: present
+
+- name: Change ownership of WordPress installation
+  file: 
+    path="{{ web_doc_root_dir }}"
+    owner=apache 
+    group=apache
+    state=directory 
+    recurse=yes 
+    setype=httpd_sys_content_t
