@@ -1,0 +1,23 @@
+---
+
+- name: copy WordPress to {{ web_doc_root_dir }}
+  shell: "rsync -avP {{ wordpress_install_src_dir }}/wordpress/ {{ web_doc_root_dir }}/"
+  
+- name: mkdir directory for uploads
+  file:
+    path: "{{ web_doc_root_dir }}/web-content/uploads"
+    state: directory
+    owner: "{{ apache_user }}"
+    group: "{{ apache_group }}"
+    mode: 0775
+  
+- name: Change ownership of WordPress installation
+  file:
+    path: "{{ web_doc_root_dir }}"
+    owner: apache
+    group: apache
+    state: directory
+    recurse: yes
+    setype: httpd_sys_content_t
+  become: yes
+  become_user: root
