@@ -31,5 +31,5 @@
     src: wp-config.php.j2 
     dest: "{{ web_doc_root_dir }}/wp-config.php"
     mode: 0644
- become: yes
- become_user: apache
+  become: yes
+  become_user: apache
