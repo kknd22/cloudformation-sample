@@ -1,1 +1,17 @@
 ---
+
+- name: download WordPress
+  get_url:
+    url: https://wordpress.org/wordpress-{{ wordpress_version }}.tar.gz
+    dest: {{ wordpress_install_src_dir }}/wordpress-{{ wordpress_version }}.tar.gz
+
+
+- name: unpack WordPress
+  unarchive:
+    src: {{ wordpress_install_src_dir }}/wordpress-{{ wordpress_version }}.tar.gz
+    dest: {{ wordpress_install_src_dir }}
+    remote_src: yes
+
+- name: copy WordPress to {{ web_doc_root_dir }}
+  shell: cp -avr {{ wordpress_install_src_dir }}/wordpress/* {{ web_doc_root_dir }}/
+  
