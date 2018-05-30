@@ -21,3 +21,8 @@
     state=directory 
     recurse=yes 
     setype=httpd_sys_content_t
+
+- name: restart mariadb Service
+  service: 
+    name=mariadb 
+    state=restarted 
