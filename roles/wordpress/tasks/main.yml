@@ -1,9 +1,9 @@
 ---
-  - - import_tasks: sys_configure.yml
-    tags:
-       - install
-       
-  - - import_tasks: install.yml
+      
+  - import_tasks: install.yml
     tags:
        - install
 
+  - import_tasks: configure.yml
+    tags:
+       - install
