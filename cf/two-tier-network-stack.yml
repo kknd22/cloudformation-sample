@@ -143,13 +143,17 @@ Resources:
       - rVPC
     Properties:
       GroupName: "Private subnet Group"
-      GroupDescription: "SSH traffic in from DMZ, all traffic out."
+      GroupDescription: "SSH and mysqp traffic in from DMZ, all traffic out."
       VpcId: !Ref rVPC
       SecurityGroupIngress:
         - IpProtocol: tcp
           FromPort: '22'
           ToPort: '22'
           CidrIp: 172.31.0.0/24
+        - IpProtocol: tcp
+          FromPort: '3306'
+          ToPort: '3306'
+          CidrIp: 172.31.0.0/24          
       SecurityGroupEgress:
         - IpProtocol: -1
           CidrIp: 0.0.0.0/0      
