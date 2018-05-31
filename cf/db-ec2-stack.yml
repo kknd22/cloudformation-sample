@@ -1,0 +1,52 @@
+---
+AWSTemplateFormatVersion: 2010-09-09
+Description: Database EC2 instance attached with subnet and security group
+
+Parameters:
+  
+  pKeyName:
+    Description: Name of an existing EC2 KeyPair to enable SSH access to the gettance
+    Type: AWS::EC2::KeyPair::KeyName
+    AllowedPattern: ".+"
+
+  pInstanceType: 
+    Description: EC2 InstanceType.
+    Type: String
+    AllowedPattern: ".+"
+
+  pSubnet:
+    Description: the subnet the dbEc2 is in
+    Type: AWS::EC2::Subnet::Id
+
+  pSecurityGroup:
+    Description: the security grouip of the subnet
+    Type: AWS::EC2::SecurityGroup::Id 
+
+
+Resources:
+  rEC2Db:
+    Type: AWS::EC2::Instance
+    Properties:
+      InstanceType: !Ref pInstanceType
+      KeyName: !Ref pKeyName
+      ImageId: ami-14c5486b
+      SubnetId: !Ref pSubnet
+      SecurityGroupIds: 
+        - !Ref pSecurityGroup
+      UserData:
+        Fn::Base64:                               
+          !Sub |
+            #!/bin/bash -ex
+              yum-config-manager --enable epel
+              #yum update -y 
+              yum install ansible -y
+              yum install git -y
+              git clone https://github.com/kknd22/cloudformation-sample.git
+              cd cloudformation-sample
+              ansible-playbook -i dbs.ini playbook-db.yml
+Outputs:
+  oDbServerIp:
+    Description: the private ip address of the newly created database server      
+    Value: !GetAtt 
+             - rEC2Db
+             - PrivateIp
