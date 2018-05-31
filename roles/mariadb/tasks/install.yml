@@ -1,11 +1,12 @@
 ---
 
-- name: install mariadbs
+- name: install mysql
   yum: 
-    name: "{{ item }}-{{ mariadb_verion }}"
+    name: "{{ item }}"
     state: present
   with_items:
-     - MariaDB-server
+     - mysql
+     - mysql-server
 #    - mariadb-server
 #    - mariadb
   become: yes
@@ -18,9 +19,9 @@
   become: yes
   become_user: root
 
-- name: start MariaDB
+- name: start mysql
   service:
-    name: mariadb
+    name: mysqld
     state: started
     enabled: yes
   become: yes
