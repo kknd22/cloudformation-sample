@@ -29,7 +29,7 @@ Resources:
     Properties:
       InstanceType: !Ref pInstanceType
       KeyName: !Ref pKeyName
-      ImageId: ami-14c5486b
+      ImageId: ami-97785bed
       SubnetId: !Ref pSubnet
       SecurityGroupIds: 
         - !Ref pSecurityGroup
@@ -38,10 +38,17 @@ Resources:
           !Sub |
             #!/bin/bash -ex
               yum-config-manager --enable epel
-              #yum update -y 
+              
+              echo "[mariadb]" > /etc/yum.repos.d/MariaDB.repo
+              echo "name = MariaDB" >> /etc/yum.repos.d/MariaDB.repo
+              echo "baseurl = http://yum.mariadb.org/5.5/rhel7-amd64" >> /etc/yum.repos.d/MariaDB.repo
+              echo "gpgkey=https://yum.mariadb.org/RPM-GPG-KEY-MariaDB"  >> /etc/yum.repos.d/MariaDB.repo
+              echo "gpgcheck=1" >> /etc/yum.repos.d/MariaDB.repo
+
+              yum update -y 
               yum install ansible -y
               yum install git -y
-              git clone https://github.com/kknd22/cloudformation-sample.git
+              git clone https://github.com/kknd22/cloudformation-sample.git 
               cd cloudformation-sample
               ansible-playbook -i dbs.ini playbook-db.yml
 Outputs:
