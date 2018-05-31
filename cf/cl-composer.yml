@@ -49,3 +49,8 @@ Resources:
         pSubnet: !GetAtt sTwoTierVPC.Outputs.oPubSubnet
         pSecurityGroup: !GetAtt sTwoTierVPC.Outputs.oPubSubnetSecurityGroup
         pBackServerIp: !GetAtt sDbEC2.Outputs.oDbServerIp
+
+Outputs:
+  oWebURL:
+    Description: Newly created web home URL      
+    Value: !GetAtt sWebEC2.Outputs.oWebURL 
