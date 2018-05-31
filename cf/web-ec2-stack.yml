@@ -44,10 +44,12 @@ Resources:
         Fn::Base64:                               
           !Sub |
             #!/bin/bash -ex
-              yum-config-manager --enable epel
+              yum-config-manager --enable epel 
+              
               yum update -y 
               yum install ansible -y
               yum install git -y
+              
               git clone https://github.com/kknd22/cloudformation-sample.git
               cd cloudformation-sample
               ansible-playbook -i webs.ini playbook-web.yml --extra-vars "db_server_ip=${pBackServerIp}"
