@@ -33,7 +33,7 @@ Resources:
     Properties:
       InstanceType: !Ref pInstanceType
       KeyName: !Ref pKeyName
-      ImageId: ami-467ca739
+      ImageId: ami-14c5486b
       NetworkInterfaces: 
         - AssociatePublicIpAddress: "true"
           DeviceIndex: "0"
@@ -44,7 +44,8 @@ Resources:
         Fn::Base64:                               
           !Sub |
             #!/bin/bash -ex
-              yum-config-manager --enable epel 
+              sleep 90
+              yum-config-manager --enable epel
               
               yum update -y 
               yum install ansible -y
