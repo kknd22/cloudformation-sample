@@ -2,8 +2,7 @@
 AWSTemplateFormatVersion: 2010-09-09
 Description: Database EC2 instance attached with subnet and security group
 
-Parameters:
-  
+Parameters: 
   pKeyName:
     Description: Name of an existing EC2 KeyPair to enable SSH access to the gettance
     Type: AWS::EC2::KeyPair::KeyName
@@ -48,6 +47,7 @@ Resources:
               yum update -y 
               yum install ansible -y
               yum install git -y
+           
               git clone https://github.com/kknd22/cloudformation-sample.git 
               cd cloudformation-sample
               ansible-playbook -i dbs.ini playbook-db.yml
