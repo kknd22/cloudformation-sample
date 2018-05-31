@@ -22,17 +22,7 @@
     name: "{{ wp_db_user }}" 
     password: "{{ wp_db_password }}" 
     priv: "{{ wp_db_name }}.*:ALL" 
-    host: localhost 
-    state: present
-    login_user: root
-    login_password: "{{ root_db_pass }}"
-
-- name: Create WordPress database user
-  mysql_user: 
-    name: "{{ wp_db_user }}" 
-    password: "{{ wp_db_password }}" 
-    priv: "{{ wp_db_name }}.*:ALL" 
-    host: "{{  web_server_ip }}" 
+    host: % 
     state: present
     login_user: root
     login_password: "{{ root_db_pass }}"
