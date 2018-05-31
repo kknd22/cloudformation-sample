@@ -39,7 +39,7 @@
 
 - name: restart mysql Service
   service: 
-    name: mysqld 
+    name: mysqld
     state: restarted 
   become: yes
   become_user: root
