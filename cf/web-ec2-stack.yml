@@ -33,7 +33,7 @@ Resources:
     Properties:
       InstanceType: !Ref pInstanceType
       KeyName: !Ref pKeyName
-      ImageId: ami-14c5486b
+      ImageId: ami-467ca739
       NetworkInterfaces: 
         - AssociatePublicIpAddress: "true"
           DeviceIndex: "0"
@@ -45,7 +45,7 @@ Resources:
           !Sub |
             #!/bin/bash -ex
               yum-config-manager --enable epel
-              #yum update -y 
+              yum update -y 
               yum install ansible -y
               yum install git -y
               git clone https://github.com/kknd22/cloudformation-sample.git
