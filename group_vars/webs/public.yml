@@ -1,5 +1,5 @@
 
-apache_version: '2.4.6'
+apache_version: '2.2.34'
 
 wordpress_version: '4.9.6'
 wordpress_install_src_dir: '/opt/source/wordpress'
