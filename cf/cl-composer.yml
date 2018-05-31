@@ -24,38 +24,6 @@ Resources:
     Properties:
       TemplateURL: https://s3.amazonaws.com/cl-stack/two-tier-network-stack.yml
 
-  sWebEC2:
-    Type: AWS::CloudFormation::Stack
-    Properties:
-      TemplateURL: https://s3.amazonaws.com/cl-stack/web-ec2-stack.yml
-      Parameters:
-        pKeyName: !Ref pKeyName
-        pInstanceType: !Ref pInstanceType---
-AWSTemplateFormatVersion: 2010-09-09
-Description: top level template to compose other nested templates to form a two tiered subnet wordpress application
-
-Parameters:
-  pKeyName:
-    Description: Name of an existing EC2 KeyPair to enable SSH access to the web tier
-    Type: AWS::EC2::KeyPair::KeyName
-    Default: cl-key-1
-    ConstraintDescription: must be the name of an existing EC2 KeyPair.
-    AllowedPattern: ".+"
-
-  pInstanceType: 
-    Description: EC2 InstanceType.
-    Type: String
-    Default: t2.small
-    AllowedValues: 
-      - t2.micro
-      - t2.small
-
-Resources:
-  sTwoTierVPC:
-    Type: AWS::CloudFormation::Stack
-    Properties:
-      TemplateURL: https://s3.amazonaws.com/cl-stack/two-tier-network-stack.yml
-
   sDbEC2:
     Type: AWS::CloudFormation::Stack
     DependsOn: 
@@ -81,6 +49,3 @@ Resources:
         pSubnet: !GetAtt sTwoTierVPC.Outputs.oPubSubnet
         pSecurityGroup: !GetAtt sTwoTierVPC.Outputs.oPubSubnetSecurityGroup
         pBackServerIp: !GetAtt sDbEC2.Outputs.oDbServerIp
-
-        pSubnet: !GetAtt sTwoTierVPC.Outputs.oPubSubnet
-        pSecurityGroup: !GetAtt sTwoTierVPC.Outputs.oPubSubnetSecurityGroup
