@@ -54,3 +54,4 @@ Outputs:
   oWebURL:
     Description: Newly created web home URL      
     Value: !GetAtt sWebEC2.Outputs.oWebURL 
+ 
