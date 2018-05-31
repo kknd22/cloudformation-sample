@@ -5,8 +5,9 @@
     name: "{{ item }}-{{ mariadb_verion }}"
     state: present
   with_items:
-    - mariadb-server
-    - mariadb
+     - MariaDB-server
+#    - mariadb-server
+#    - mariadb
   become: yes
   become_user: root
 
