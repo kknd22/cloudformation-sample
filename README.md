@@ -1,7 +1,8 @@
 # cloudformation-sample  
 
 ## Overview  
-The code demostrate a Wordpress LAMP stack provisioned used Ansible and deployed to a AWS cloud provisioned using AWS's CloudFormation code.   
+The code demostrate a Wordpress LAMP stack provisioned used Ansible and deployed to a AWS cloud provisioned using AWS's CloudFormation code.  
+
 
 ## AWS Cloud Provision 
 AWS VPC cloud has been configured to have one frontend (WEB facing) subnet, one private backend subnet, which can only be accessed on specific ports, ssh and mysql client 3306. The backend subnet access the internet through NAT gateway installed in the frontend subnet and then through the Internet Gateway. AWS cloudformation nested stacks have been used to in the following way:
@@ -10,7 +11,13 @@ AWS VPC cloud has been configured to have one frontend (WEB facing) subnet, one 
   - frontend web server stack
   - backend database server stack
 - organize the CF code to three seperated logical component stacks with one top level *composer* stack to produce final stack.
-- all nested component CF stack with well defined input parameters and output values strongly promote reuse 
+- all nested component CF stack with well defined input parameters and output values strongly promote reuse  
+
+CF overall stack  
+![CF overall stack](https://github.com/kknd22/cloudformation-sample/blob/master/cf/diagrams/cl-composer.png)  
+
+CF VPC stack
+![CF VPC stack](https://github.com/kknd22/cloudformation-sample/blob/master/cf/diagrams/vpc.png)  
 
 ## Backend DB Server Provision  
 A Linux Server has been provisioned by ansible with mysql server.  
